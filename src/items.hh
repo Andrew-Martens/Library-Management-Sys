@@ -24,7 +24,7 @@ namespace Library {
 
         virtual std::string to_string() = 0;
 
-        ~Item(){}
+        virtual ~Item(){}
     };
 
     class Book : public Item {
