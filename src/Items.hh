@@ -8,6 +8,7 @@
 #define ITEMS_HH__
 
 #include<string>
+#include<iostream>
 #include<cstdlib>
 #include<unordered_map> 
 
@@ -24,17 +25,19 @@ namespace Library {
         public:
         // Constructors - idealy params have a name and type
         // type corresponds to the type of library item:
-        // 10000(book), 20000(film), 30000(magazine)
+        // 1 (book), 2 (film), 3 (magazine)
         Item() : id(0), copies(1), name("Unknown Item") {}
         Item(std::string name) : id(0), copies(1), name(name) {}
-        Item(std::string name, int type) : id(type + get_id()), copies(1), name(name) {}
+        Item(std::string name, int type) : id(type), copies(1), name(name) {}
 
         // getter methods for id and name
         int get_id() const { return id; }
         int get_copies() const {return copies; }
+        void add_copy() {copies++;}
+        void take_copy() {copies--;}
         std::string get_name() const { return name; }
 
-        virtual std::string to_string() = 0;  // every subclass should have a to_string
+        virtual void print() = 0;  // every subclass should have a print
 
         // override the comparative operators
         bool operator==(Item &item) {
@@ -56,17 +59,14 @@ namespace Library {
     class Book : public Item {
         private:
         const std::string author;
-        const std::string genre;
         
         public:
-        Book(std::string name) : Item(name, 10000), author("N/A"), genre("N/A") {}
-        Book(std::string name, std::string author) : Item(name, 10000), author(author), genre("N/A") {}
-        Book(std::string name, std::string author, std::string genre) : Item(name, 10000), author(author), genre(genre) {}
+        Book(std::string name) : Item(name, 1), author("N/A") {}
+        Book(std::string name, std::string author) : Item(name, 1), author(author) {}
 
         std::string get_author() const { return author; }  // getter method for author string
-        std::string get_genre() const { return genre; }  // getter method for author string
-        std::string to_string() {
-            return "Book: " + get_name() +"\n" + get_author() + "\n" + get_genre();
+        void print() {
+            std::cout << "Book: " + get_name() +"\nAuthor: " + get_author() + "\nCopies: " << get_copies();
         }
 
         ~Book(){}  // destructor for Book
@@ -78,13 +78,13 @@ namespace Library {
         const std::string director;
 
         public:
-        Film(std::string name) : Item(name), director("N/A") {}
-        Film(std::string name, std::string director) : Item(name), director(director) {}
+        Film(std::string name) : Item(name, 2), director("N/A") {}
+        Film(std::string name, std::string director) : Item(name, 2), director(director) {}
         
         std::string get_director() const {return director;} // getter method for director string
         // string representation of this class
-        std::string to_string() {
-            return "Film: " + get_name() + "\n" + get_director();
+        void print() {
+            std::cout << "Film: " + get_name() + "\nDirector: " + get_director() + "\ncopies: " << get_copies();
         }
 
         ~Film(){}  // destructor for Film
@@ -95,13 +95,13 @@ namespace Library {
         std::string publisher;
 
         public:
-        Magazine(std::string name) : Item(name), publisher("N/A") {}
-        Magazine(std::string name, std::string publisher) : Item(name), publisher(publisher) {}
+        Magazine(std::string name) : Item(name, 3), publisher("N/A") {}
+        Magazine(std::string name, std::string publisher) : Item(name, 3), publisher(publisher) {}
         
         std::string get_publisher() const {return publisher;}; // getter method for publisher string
         // string representation of this class
-        std::string to_string() {
-            return "Magazine: " + get_name() + "\n" + get_publisher();
+        void print() {
+            std::cout << "Magazine: " + get_name() + "\nPublisher: " + get_publisher() +"\nCopies: " << get_copies();
         }
 
         ~Magazine(){}  // destructor for Magazine
