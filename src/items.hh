@@ -1,7 +1,7 @@
 /**
 * This file contains class representations of library items
 * the three items in this file include Book, Magazine, and Film
-* 
+*  
 * @author Andrew Martens
 */
 
@@ -30,14 +30,17 @@ namespace Library {
     class Book : public Item {
         private:
         std::string m_author;
+        std::string m_genre;
         
         public:
-        Book(std::string name) : Item(name), m_author("N/A") {};
-        Book(std::string name, std::string author) : Item(name), m_author(author) {};
+        Book(std::string name) : Item(name), m_author("N/A"), m_genre("N/A") {};
+        Book(std::string name, std::string author) : Item(name), m_author(author), m_genre("N/A") {};
+        Book(std::string name, std::string author, std::string genre) : Item(name), m_author(author), m_genre(genre) {};
 
-        std::string get_author();  // getter method for author string
+        std::string get_author() { return m_author; }  // getter method for author string
+        std::string get_genre() { return m_genre; }  // getter method for author string
         std::string to_string() {
-            return get_name() + "\n" + get_author();
+            return get_name() + "\n" + get_author() + "\n" + get_genre();
         }
 
         ~Book(){}  // destructor for Book
