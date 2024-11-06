@@ -1,0 +1,2 @@
+Andrew;200000;Red Mars;Bible
+lily;100000;Toy Story
