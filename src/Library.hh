@@ -42,11 +42,26 @@ namespace LibSys {
         std::string m_username;
 
     public:
+        /**
+         * Constructor for high level Library class
+         * 
+         * The constructor builds a directory structure to store library data and 
+         * loads any items that have been prviously saved.
+         *
+         * Directory structure as follows:
+         *      Current
+         *          libraries
+         *              <library_name>
+         *                  items.txt
+         *                  inventory.txt
+         *
+         */
         Library(std::string name) : m_library_name(name), m_user(nullptr), m_username("Guest"),
-                                    u_filename(name+"/users.txt"), i_filename(name+"/inventory.txt") {
+                                    u_filename("libraries/"+name+"/users.txt"), i_filename("libraries/"+name+"/inventory.txt") {
 
-            // Create a directory to store library information
-            std::filesystem::path lib_path(name);
+            // Create directory structure to store library information
+            std::filesystem::create_directory("libraries");
+            std::filesystem::path lib_path("libraries/" + name);
             if(std::filesystem::create_directory(lib_path)) {
                 // Create the files that store user, and inventory information
                 std::ofstream user_file(u_filename);
