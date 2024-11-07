@@ -72,11 +72,6 @@ namespace LibSys {
             load_items(); //load items into unordered_map
         }
 
-        Library(std::ifstream ifs) : m_library_name("Test-Library"), m_user(nullptr), m_username("Guest"), u_filename("libraries/Test-Library/users.txt"), i_filename("libraries/Test-Library/inventory.txt") {
-
-
-        }
-
         
         /**
          * @author Andrew Martens
@@ -695,12 +690,13 @@ namespace LibSys {
             }
         }
 
+
+
         /**
-         * The following methods are helpers to the main
-         * functions in run()
+         * @author Andrew Martens
+         *
+         * @brief returns false if given string contains a semicolon
          */
-
-
         bool validate(std::string str) {
            //ensure no semicolon in library's name
            return !(str.find(';') != std::string::npos);

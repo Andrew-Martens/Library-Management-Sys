@@ -1,9 +1,23 @@
-INTRO
+Library Management System in C++
 
-The Library Management System is a C++ application designed to help manage a library's book inventory, track borrowed books, and facilitate user management. This system provides a user-friendly interface and efficient data handling for librarians and users.
-This program is intended to run in a terminal with no GUI.
+This is a simple Library Management System implemented in C++ that allows the management of library items and different types of library users. The system provides features for adding, searching, and deleting books.
+
+FEATURES
+ - add-item
+ - remove-item
+ - search
+ - list all items
+ - login
+ - logout
+ - view profile
+ - checkout
+ - return
+
+PREREQUISITES
+
+Must have a working C++ 17 or higher compiler
 
 RUNNING
 
-If you'd like to run the code clone, compile, and run ./main. 
+To run the code clone the repo, then compile main.cc and run the outputted file
 

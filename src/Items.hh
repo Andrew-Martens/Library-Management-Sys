@@ -2,7 +2,7 @@
 * This file contains class representations of library items
 * the three items in this file include Book, Magazine, and Film
 * each item has a corresponding ID book = 1, film = 2, & magazine = 3
-*  
+* 
 * @author Andrew Martens
 */
 
