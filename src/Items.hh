@@ -87,7 +87,7 @@ namespace LibSys {
         /*
          * Constructors for Book class
          *
-         *
+         * 
          */
         Book(std::string name) : Item(name, 1), m_author("N/A") {}
         Book(std::string name, std::string author) : Item(name, 1), m_author(author) {}

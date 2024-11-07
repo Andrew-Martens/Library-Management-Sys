@@ -1,5 +1,0 @@
-2;Frozen;Jennifer Lee;1
-3;Animals;National Geographic;2
-1;Red Mars;Kim Stanley Robinson;0
-1;Bible;Jesus;1
-2;Toy Story;Director;1

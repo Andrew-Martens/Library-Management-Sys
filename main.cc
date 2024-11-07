@@ -24,7 +24,7 @@ int main() {
 
     //ensure no whitespace in library's name
     if(lib_name.find(' ') != std::string::npos) {
-        throw std::invalid_argument( "received negative value" );
+        throw std::invalid_argument("Error: Library name can't contain a space");
     }
     //create object and run
     LibSys::Library library(lib_name);

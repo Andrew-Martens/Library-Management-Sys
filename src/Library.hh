@@ -43,7 +43,7 @@ namespace LibSys {
 
     public:
         /**
-         * Constructor for high level Library class
+         * Main constructor for high level Library class
          * 
          * The constructor builds a directory structure to store library data and 
          * loads any items that have been prviously saved.
@@ -70,6 +70,11 @@ namespace LibSys {
                 inventory_file.close();
             }
             load_items(); //load items into unordered_map
+        }
+
+        Library(std::ifstream ifs) : m_library_name("Test-Library"), m_user(nullptr), m_username("Guest"), u_filename("libraries/Test-Library/users.txt"), i_filename("libraries/Test-Library/inventory.txt") {
+
+
         }
 
         
@@ -237,7 +242,7 @@ namespace LibSys {
          */
         void write_users() {
             //input file from users.txt and create a temp file to write to
-            std::string t_filename = m_library_name+"/temp.txt";
+            std::string t_filename = "Libraries/"+ m_library_name +"/temp.txt";
             std::ifstream ifs(u_filename);
             std::ofstream temp(t_filename);
 
@@ -331,6 +336,11 @@ namespace LibSys {
             std::getline(std::cin, username);
             username.erase(0,1);
 
+            if(!validate(username)) {
+                std::cout << "Error: Username can't contain a semicolon\n";
+                return;
+            }
+
 
             //create input file stream to see all users, 
             std::ifstream ifs(u_filename);
@@ -355,7 +365,7 @@ namespace LibSys {
                     // construct user
                     m_user = new User(username, id);
                     m_username = username;
-                    
+                     
 
                     // any remaining tokens are items the user checked out
                     // therefore every token past token[1] needs to be pushed to user's items vector
@@ -411,9 +421,9 @@ namespace LibSys {
         }
 
         /**
+         * @author Andrew Martens
          * 
-         * 
-         * see: https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+         * @brief splits a string and stores tokens in a vector
          */
         void split(std::string s, const char& delimiter, std::vector<std::string>& tokens) {
             size_t pos = 0;
@@ -435,7 +445,7 @@ namespace LibSys {
          * @author Andrew Martens
          * 
          * @brief searches through library's inventory to see if an item with inputed keyword exists
-         * @param string keyword the title to search for
+         * @param keyword the title to search for
          * @returns false if item isn't found
          */
         bool search(std::string keyword) {
@@ -515,6 +525,7 @@ namespace LibSys {
          * @author Andrew Martens
          *
          * @brief checks a library item out based of a given keyword
+         * @note user must be logged in to access this method
          */
         void checkout() {
             std::string keyword;
@@ -596,6 +607,12 @@ namespace LibSys {
             std::cout << "Enter title > ";
             std::getline(std::cin, title);
 
+            //validate title field
+            if(!validate(title)) {
+                std::cout << "Error: Title can't contain ';'\n";
+                return;
+            }
+
             //catch if library item already exists
             if(m_library.count(title) > 0) {
                 std::cout << "Item already in inventory. Add a copy? [y/n]: "; //prompt user
@@ -618,6 +635,12 @@ namespace LibSys {
                 std::cout << "Enter the author: ";
                 std::getline(std::cin, extra);
 
+                //validate author name
+                if(!validate(extra)) {
+                    std::cout << "Error: Author can't contain ';'\n";
+                    return;
+                }
+
                 //construct Item, add to map, & write to file
                 Item* item = new Book(title, extra);
                 m_library[title] = item;
@@ -625,6 +648,11 @@ namespace LibSys {
                 //get extra info from user
                 std::cout << "Enter the director: ";
                 std::getline(std::cin, extra);
+                
+                if(!validate(extra)) { //validate director name
+                    std::cout << "Error: Director can't contain ';'\n";
+                    return;
+                }
 
                 //construct Item, add to map, & write to file
                 Item* item = new Film(title, extra);;
@@ -633,6 +661,11 @@ namespace LibSys {
                 //get extra info from user
                 std::cout <<"Enter the publisher > ";
                 std::getline(std::cin, extra);
+
+                if(!validate(extra)) { //validate publisher name
+                    std::cout << "Error: Publisher can't contain ';'\n";
+                    return;
+                }
 
                 //construct Item, add to map, & write to file
                 Item* item = new Magazine(title, extra);;
@@ -660,6 +693,17 @@ namespace LibSys {
             } else{
                 std::cout << "Item not found\n";
             }
+        }
+
+        /**
+         * The following methods are helpers to the main
+         * functions in run()
+         */
+
+
+        bool validate(std::string str) {
+           //ensure no semicolon in library's name
+           return !(str.find(';') != std::string::npos);
         }
         
     };
