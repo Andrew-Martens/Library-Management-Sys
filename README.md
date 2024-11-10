@@ -1,8 +1,9 @@
-Library Management System in C++
+**Library Management System in C++**
 
-This is a simple Library Management System implemented in C++ that allows the management of library items and different types of library users. The system provides features for adding, searching, and deleting books.
+A command-line-based Library Management System built in C++17, designed to manage books, members, and transactions in a library. This project allows users to add, remove, search for books, and handle borrowing/returning operations for library members.
 
-FEATURES
+
+**FEATURES**
  - add-item
  - remove-item
  - search
@@ -13,11 +14,20 @@ FEATURES
  - checkout
  - return
 
-PREREQUISITES
+**PREREQUISITES**
 
-Must have a working C++ 17 or higher compiler
+C++17 or later and GCC or Clang compiler with C++17 support
 
-RUNNING
+**INSTALLATION**
 
-To run the code clone the repo, then compile main.cc and run the outputted file
+git clone https://github.com/your-username/library-management-system.git
 
+cd library-management-system
+
+g++ -std=c++17 -o library_system main.cpp
+
+**RUNNING THE PROGRAM**
+
+Upon running the program, the user should enter a library name, and the program will construct a directory structure to store information. The user can also enter "help" to see a list of commands.
+
+NOTE: All commands and inputs are case-sensitive and searches for library items must match their corresponding title for that item to appear.
