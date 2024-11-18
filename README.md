@@ -20,7 +20,7 @@ C++17 or later and GCC or Clang compiler with C++17 support
 
 **INSTALLATION**
 
-git clone https://github.com/your-username/library-management-system.git
+git clone https://github.com/Andrew-Martens/library-management-system.git
 
 cd library-management-system
 
