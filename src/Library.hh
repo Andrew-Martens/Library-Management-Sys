@@ -299,16 +299,17 @@ namespace LibSys {
         }
 
         /**
-         * @author Andrew Martens
+         * @author Rachel Roach & Andrew Martens
          * 
          * @brief prints a list of commands to the console
          */
         void help() {
-            std::cout << "\nLIST OF COMMANDS:\n";
-            std::cout << "help, search <name>, all-items, login <username>, logout, profile\n";
-            std::cout << "checkout <title>, return-item <title>, add-item, remove-item <title>, and exit\n\n";
+            std::cout << "\nLIST OF COMMANDS:";
+            std::cout << "\n-------------------------------------------------";
+            std::cout << "\n1.  help\t\t2. search <name>\n3.  all-items\t\t4. login <username>\n5.  logout\t\t6. profile\n";
+            std::cout << "7.  checkout <title>\t8. return-item <title>\n9.  add-item\t\t10. remove-item <title>\n11. exit";
+            std::cout << "\n-------------------------------------------------\n\n";
         }
-
 
         /**
          * @author Andrew Martens
