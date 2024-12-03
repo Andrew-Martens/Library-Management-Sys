@@ -16,13 +16,8 @@
 int main() {
 
     // Header for opening showing the different libraries user can access
-    std::cout << "\n-=Welcome to the Library=-";
-    std::cout << "\n--------------------------";
-    std::cout << "\nSearch Options:";
-    std::cout << "\n1. Book";
-    std::cout << "\n2. Movie";
-    std::cout << "\n3. Magazine";
-    std::cout << "\n--------------------------\n";
+    std::cout << "\n-=Welcome to the Library Management System=-";
+    std::cout << "\n--------------------------------------------\n";
 
     std::string lib_name;
 
@@ -34,6 +29,7 @@ int main() {
     if(lib_name.find(' ') != std::string::npos) {
         throw std::invalid_argument("Error: Library name can't contain a space");
     }
+
     //create object and run
     LibSys::Library library(lib_name);
     library.run();
