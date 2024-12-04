@@ -1,5 +1,5 @@
 /**
-* @author Andrew Martens
+* @author Andrew Martens & Rachel Roach
 *
 * This file contains the high level functionallity for the library system
 * to use create Library object and call run()
@@ -40,6 +40,7 @@ namespace LibSys {
         const std::string i_filename; //inventory filename
         User* m_user;
         std::string m_username;
+        std::string m_password;
 
     public:
         /**
@@ -56,7 +57,7 @@ namespace LibSys {
          *                  inventory.txt
          *
          */
-        Library(std::string name) : m_library_name(name), m_user(nullptr), m_username("Guest"),
+        Library(std::string name) : m_library_name(name), m_user(nullptr), m_username("Guest"), m_password("0"),
                                     u_filename("libraries/"+name+"/users.txt"), i_filename("libraries/"+name+"/inventory.txt") {
 
             // Create directory structure to store library information
@@ -74,7 +75,7 @@ namespace LibSys {
 
         
         /**
-         * @author Andrew Martens
+         * @author Andrew Martens & Rachel Roach
          * 
          * @brief this method runs the actual library system and offers relevant functionallities
          * @see close(), help(), login(), search(), print_items(), 
@@ -101,10 +102,11 @@ namespace LibSys {
                     help(); 
                 } else if (command=="login") {
                     if(m_user) {
-                        std::cout << "Already logged in\n";
                         continue;
                     }
                     login();
+                } else if (command == "create-account") {
+                    createAccount();
                 } else if (command=="search") {
                     //get keyword from user
                     std::string keyword;
@@ -123,10 +125,14 @@ namespace LibSys {
                         delete m_user;
                         m_user = nullptr;
                         m_username = "Guest";
+                        m_password = "0";
                     }
+                    std::cout << "\nLogging Out...\n\n";
                 } else if(command=="profile"){
                     if(m_user) {
+                        std::cout << "\n";
                         m_user->print();
+                        std::cout << "\n";
                     }
                 } else if (command=="checkout") {
                     //ensure user is logged in
@@ -145,7 +151,7 @@ namespace LibSys {
                 } else if(command=="add-item") {
                     //ensure user is logged in to an admin account
                     if(!m_user || m_user->m_id < 200000){
-                        std::cout << "Only librarians can access this command\n";
+                        std::cout << "\nOnly librarians can access this command\n\n";
                         continue;
                     }
                     add_item();
@@ -157,7 +163,11 @@ namespace LibSys {
                     }
                     remove_item();
                 } else {
-                    std::cout << "Unknown Command\n";
+                    if(!m_user) {
+                        std::cout << "\nUnknown Command\n\n";
+                    } else {
+                        std::cout << "\n\nCommand not available for logged in users\n\n";
+                    }
                 }
             }
         }
@@ -228,7 +238,7 @@ namespace LibSys {
         }
 
         /**
-         * @author Andrew Martens
+         * @author Andrew Martens & Rachel Roach
          *
          * @brief writes user information to file
          *
@@ -242,7 +252,7 @@ namespace LibSys {
             std::ofstream temp(t_filename);
 
             //write logged in user to file to save any changes
-            temp << m_user->m_name << ";" << m_user->m_id;
+            temp << m_user->m_name << ";" << m_user->m_password << ";" << m_user->m_id;
             for(Item* item : m_user->m_items) {
                 temp << ";" << item->get_name();
             }
@@ -277,8 +287,6 @@ namespace LibSys {
             rename(t_filename.c_str(), u_filename.c_str());
         }
 
-        
-
         /**
          * @author Andrew Martens
          * @brief deletes all library items from heap
@@ -299,20 +307,84 @@ namespace LibSys {
         }
 
         /**
-         * @author Rachel Roach & Andrew Martens
+         * @author Rachel Roach
          * 
          * @brief prints a list of commands to the console
          */
         void help() {
             std::cout << "\nLIST OF COMMANDS:";
             std::cout << "\n-------------------------------------------------";
-            std::cout << "\n1.  help\t\t2. search <name>\n3.  all-items\t\t4. login <username>\n5.  logout\t\t6. profile\n";
-            std::cout << "7.  checkout <title>\t8. return-item <title>\n9.  add-item\t\t10. remove-item <title>\n11. exit";
+            std::cout << "\n1.  help\t\t2.  search <name>\n3.  all-items\t\t4.  login <username>\n5.  logout\t\t6.  profile\n";
+            std::cout << "7.  checkout <title>\t8.  return-item <title>\n9.  add-item\t\t10. remove-item <title>\n11. exit\t\t12. create-account";
             std::cout << "\n-------------------------------------------------\n\n";
         }
 
         /**
-         * @author Andrew Martens
+        * @author Rachel Roach
+        *
+        * @brief creates a user account and stores it in a file
+        */
+        void createAccount() {
+            
+            // User variables
+            std::string username;
+            std::string password;
+            int id;
+
+            std::cout << "\nWould you like to make an account [y/n]: ";
+                char ch;
+                std::cin >> ch;
+
+                if(ch == 'y') {
+                    std::ofstream ofs(u_filename, std::ios::app);
+                    if (!ofs) {
+                        std::cout << "Error: Unable to open user file for writing.\n";
+                        return;
+                    }
+
+                    //make id for user and write new user into <library_name>/users.txt
+                    std::cout << "\nTo create librarian account enter 'l', else enter 'm' > ";
+                    std::cin >> ch;
+
+                    if(ch == 'l') { //code to create librarian/admin account
+                        //construct user with admin permissions and print
+                        std::cout << "Enter a username: ";
+                        std::cin >> username;
+                        std::cout << "Enter a password: ";
+                        std::cin >> password;
+                        id = create_id(true);
+                        m_user = new User(username, password, id);
+                        m_username = m_user->m_name;
+                    } else if(ch == 'm') {
+                        // construct user without admid permissions and print
+                        std::cout << "Enter a username: ";
+                        std::cin >> username;
+                        std::cout << "Enter a password: ";
+                        std::cin >> password;
+                        id = create_id(false);
+                        m_user = new User(username, password, id);
+                        m_username = m_user->m_name;
+                    } else { //code to create library member account
+                        std::cout << "\nCreating empty account w/ no permissions...\n";
+                        //construct user without admin permissions and print
+                        id = create_id(false);
+                        m_user = new User(username, password, id);
+                        m_username = m_user->m_name;
+                    }
+                    //print conformation
+                    std::cout << "\nCreated new user:\n";
+                    std::cout << "-----------------\n";
+                    m_user->print();
+                    std::cout << "\n";
+                } else if (ch == 'n') {
+                    std::cout << "\nReturning to Guest user...\n\n";
+                }  else {
+                    std::cout << "\nReturning to Guest user...\n";
+                }
+        }
+
+        /**
+         * @author Andrew Martens & Rachel Roach
          *
          * @brief checks inputed username against known users & can create a new user if username is unique
          * 
@@ -325,8 +397,8 @@ namespace LibSys {
         void login() {
             // user variables
             std::string username;
+            std::string password;
             int id;
-
 
             //get username and email from user
             std::getline(std::cin, username);
@@ -336,7 +408,6 @@ namespace LibSys {
                 std::cout << "Error: Username can't contain a semicolon\n";
                 return;
             }
-
 
             //create input file stream to see all users, 
             std::ifstream ifs(u_filename);
@@ -349,59 +420,48 @@ namespace LibSys {
                 
                 
                 //if the entered username matches the entry's username construct user
-                if(tokens[0] == username) {
-                    //convert id to int. Throws error message if it can't be converted
-                    try{
-                        id = std::stoi(tokens[1]);
-                    } catch(std::invalid_argument) {
-                        std::cout << "Error Logging in: File format error\n";
-                        return;
-                    }
+                if (tokens.size() > 1 && tokens[0] == username) {
+            // Prompt for password
+            std::cout << "\nEnter password: ";
+            std::getline(std::cin, password);
 
-                    // construct user
-                    m_user = new User(username, id);
-                    m_username = username;
-                     
-
-                    // any remaining tokens are items the user checked out
-                    // therefore every token past token[1] needs to be pushed to user's items vector
-                    for(int i = 2; i < tokens.size(); i++) {
-                        // get item title and push back the corresponding Item from the library's unordered map
-                        std::string item = tokens[i];
-                        m_user->m_items.push_back(m_library[item]);
-                    }
-                    m_user->print(); //print user info
-
-                    ifs.close();
+            // Verify password
+            if (tokens[1] == password) {
+                // Convert ID to integer
+                try {
+                    id = std::stoi(tokens[2]);
+                } catch (std::invalid_argument) {
+                    std::cout << "Error Logging in: File format error\n";
                     return;
                 }
+
+                // Construct user object
+                m_user = new User(username, password, id);
+                m_username = username;
+
+                // Populate user's items
+                for (size_t i = 3; i < tokens.size(); i++) {
+                    std::string item = tokens[i];
+                    m_user->m_items.push_back(m_library[item]);
+                }
+
+                std::cout << "\nLog In Successful:\n";
+                m_user->print(); // Print user info
+                std::cout << "\n";
+                ifs.close();
+                return;
+            } else {
+                // Password mismatch
+                std::cout << "\nIncorrect Password. Returning as Guest user...\n";
+                ifs.close();
+                return;
+            }
+        }
             }
             //if no account was found close input file and ask user if they would like to make an account
             ifs.close();
-            std::cout << "Username not found.\nWould you like to make an account [y/n]: ";
-            char ch;
-            std::cin >> ch;
-
-            if(ch == 'y') {
-                //make id for user and write new user into <library_name>/users.txt
-                std::cout << "To create librarian account enter 'l', else enter 'm' > ";
-                std::cin >> ch;
-
-                if(ch == 'l') { //code to create librarian/admin account
-                    //construct user with admin permision and print
-                    id = create_id(true);
-                    m_user = new User(username, id);
-                    m_username = m_user->m_name;
-                } else { //code to create library member account
-                    //construct user without admin permision and print
-                    id = create_id(false);
-                    m_user = new User(username, id);
-                    m_username = m_user->m_name;
-                }
-                //print conformation
-                std::cout << "Created new user:\n";
-                m_user->print();
-            }
+            std::cout << "\nAccount not found\n";
+            createAccount();
         }
 
         /**
@@ -573,7 +633,7 @@ namespace LibSys {
         }
 
         /**
-         * @author Andrew Martens
+         * @author Andrew Martens & Rachel Roach
          *
          * @brief adds an item to the library. If item is alreay in library option is given to add a copy
          * @note only users with admin access can access this functionality
@@ -585,14 +645,20 @@ namespace LibSys {
             std::string extra;
 
             //get item type
-            std::cout << "To add book enter '1', film '2', and magazine '3' > ";
+            std::cout << "\nOptions:";
+            std::cout << "\n-----------------";
+            std::cout << "\n1. Book";
+            std::cout << "\n2. Movie";
+            std::cout << "\n3. Magazine";
+            std::cout << "\n-----------------";
+            std::cout << "\n\nType of Item You're Adding (Enter Number) > ";
 
             //read into string to check type safety
             std::cin >> title; 
             try{
                 type = std::stoi(title);
             } catch(std::invalid_argument) {
-                std::cout << "Invalid Argument\n";
+                std::cout << "\nInvalid Argument. No Longer adding item...\n\n";
                 return;
             }
             
@@ -600,7 +666,7 @@ namespace LibSys {
             std::cin.ignore (std::numeric_limits<std::streamsize>::max(), '\n');
 
             // Get title from user
-            std::cout << "Enter title > ";
+            std::cout << "\nEnter title: ";
             std::getline(std::cin, title);
 
             //validate title field
@@ -611,65 +677,67 @@ namespace LibSys {
 
             //catch if library item already exists
             if(m_library.count(title) > 0) {
-                std::cout << "Item already in inventory. Add a copy? [y/n]: "; //prompt user
+                std::cout << "\nItem already in inventory. Add a copy? [y/n]: "; //prompt user
 
                 char ch;
                 std::cin >> ch;
                 if(ch != 'y') { //don't add copy and return
-                    std::cout << "Copy not added\n";
+                    std::cout << "\n--------------\nCopy not added\n--------------\n\n";
                     return;
                 }
                 //add copy and return
                 m_library[title]->add_copy();
-                std::cout << "Copy added\n";
+                std::cout << "\n----------\nCopy added\n----------\n\n";
                 return;
             }
 
-    
+            // for BOOK
             if(type == 1) {
-                //get extra info from user
+                // Gets the name of the author
                 std::cout << "Enter the author: ";
                 std::getline(std::cin, extra);
-
-                //validate author name
+                // Validates the name
                 if(!validate(extra)) {
                     std::cout << "Error: Author can't contain ';'\n";
                     return;
                 }
-
-                //construct Item, add to map, & write to file
+                // construct Item, add to map, & write to file
                 Item* item = new Book(title, extra);
                 m_library[title] = item;
-            }else if(type == 2) {
+            }
+
+            // for MOVIE
+            else if(type == 2) {
                 //get extra info from user
                 std::cout << "Enter the director: ";
                 std::getline(std::cin, extra);
-                
-                if(!validate(extra)) { //validate director name
+                // Validates name
+                if(!validate(extra)) {
                     std::cout << "Error: Director can't contain ';'\n";
                     return;
                 }
-
                 //construct Item, add to map, & write to file
                 Item* item = new Film(title, extra);;
                 m_library[title] = item;
-            }else if(type == 3) {
-                //get extra info from user
-                std::cout <<"Enter the publisher > ";
-                std::getline(std::cin, extra);
+            }
 
-                if(!validate(extra)) { //validate publisher name
+            // for MAGAZINE
+            else if(type == 3) {
+                // Gets publisher name
+                std::cout <<"Enter the publisher: ";
+                std::getline(std::cin, extra);
+                // Validates name
+                if(!validate(extra)) { 
                     std::cout << "Error: Publisher can't contain ';'\n";
                     return;
                 }
-
                 //construct Item, add to map, & write to file
                 Item* item = new Magazine(title, extra);;
                 m_library[title] = item;
             }else {
-                std::cout << "Unknown library item type. Item not added\n";
+                std::cout << "\nUnknown library item type. Item not added\n\n";
             }
-            std::cout << title << " added successfully\n";
+            std::cout << "\n" << title << " added successfully\n\n";
         }
 
         /**

@@ -22,7 +22,7 @@ int main() {
     std::string lib_name;
 
     // prompt user for library name
-    std::cout << "\nEnter Library name. Note: can not use whitespace > ";
+    std::cout << "\nEnter the Library Name You're Using. Note: can not use whitespace > ";
     std::cin >> lib_name;
 
     //ensure no whitespace in library's name
