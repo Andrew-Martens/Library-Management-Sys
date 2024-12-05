@@ -19,9 +19,9 @@
 #include<filesystem>
 #include<fstream>
 #include<unordered_map>
+#include<algorithm>
 #include "Users.hh"
 #include "Items.hh"
-
 
 namespace LibSys {
 
@@ -55,7 +55,6 @@ namespace LibSys {
          *              <library_name>
          *                  items.txt
          *                  inventory.txt
-         *
          */
         Library(std::string name) : m_library_name(name), m_user(nullptr), m_username("Guest"), m_password("0"),
                                     u_filename("libraries/"+name+"/users.txt"), i_filename("libraries/"+name+"/inventory.txt") {
@@ -96,7 +95,7 @@ namespace LibSys {
                     }
                     //delete items from heap
                     close();
-                    std::cout << "System terminating...\n";
+                    std::cout << "\nSystem terminating...\n\n";
                     return;
                 } else if (command=="help") {
                     help(); 
@@ -107,6 +106,8 @@ namespace LibSys {
                     login();
                 } else if (command == "create-account") {
                     createAccount();
+                } else if (command == "delete-account") {
+                    deleteAccount();
                 } else if (command=="search") {
                     //get keyword from user
                     std::string keyword;
@@ -315,7 +316,7 @@ namespace LibSys {
             std::cout << "\nLIST OF COMMANDS:";
             std::cout << "\n-------------------------------------------------";
             std::cout << "\n1.  help\t\t2.  search <name>\n3.  all-items\t\t4.  login <username>\n5.  logout\t\t6.  profile\n";
-            std::cout << "7.  checkout <title>\t8.  return-item <title>\n9.  add-item\t\t10. remove-item <title>\n11. exit\t\t12. create-account";
+            std::cout << "7.  checkout <title>\t8.  return-item <title>\n9.  add-item\t\t10. remove-item <title>\n11. exit\t\t12. create-account\n13. delete-account";
             std::cout << "\n-------------------------------------------------\n\n";
         }
 
@@ -382,6 +383,140 @@ namespace LibSys {
                     std::cout << "\nReturning to Guest user...\n";
                 }
         }
+
+
+
+
+
+
+
+
+
+        /**
+        * @author Rachel Roach
+        *
+        * @brief Deletes the currently logged-in user account after password verification.
+        * Prevents account deletion if the user has checked-out items and transitions to a guest user if successful.
+        */
+        void deleteAccount() {
+
+            // Check if a user is logged in
+            if (!m_user) {
+                std::cout << "\nYou must be logged in to delete an account.\n\n";
+                return;
+            }
+
+            // Local variables
+            std::string username = m_user->m_name;
+            std::string storedPassword;
+            std::string enteredPassword;
+            std::string checkedOutItem;
+            std::string tempFilename = "temp_users.txt";
+            std::ifstream ifs(u_filename);
+            std::ofstream ofs(tempFilename, std::ios::out);
+            std::string line;
+            bool userFound = false;
+            bool hasCheckedOutItems = false;
+
+            // throws an error if file cannot be opened
+            if (!ifs || !ofs) {
+                std::cout << "\nError: Unable to open file.\n\n";
+                return;
+            }
+
+            // Process the user file line by line
+            while (std::getline(ifs, line)) {
+                std::stringstream ss(line);
+                std::string fileUsername, filePassword, fileCheckedOutItem;
+                int fileId;
+
+                // Parse the line in the file in the format: 
+                // "username;password;id;checkedOutItem"
+                if (std::getline(ss, fileUsername, ';') &&
+                    std::getline(ss, filePassword, ';') &&
+                    ss >> fileId) {
+                    // Ensure that we clean up any extra whitespace between the fields
+                    std::getline(ss, fileCheckedOutItem);
+
+                    // if the username is found in the file...
+                    if (fileUsername == username) {
+                        userFound = true;
+                        storedPassword = filePassword;
+                        checkedOutItem = fileCheckedOutItem;
+
+                        // Check if the user has checked-out items
+                        if (!checkedOutItem.empty()) {
+                            hasCheckedOutItems = true;
+                            // Replace semicolons with spaces in the checked-out item string -- for print statement
+                            std::replace(checkedOutItem.begin(), checkedOutItem.end(), ';', ' ');
+                            std::cout << "\nError: Cannot delete account due to outstanding items:" << checkedOutItem << "\n\n";
+                            ofs << line << "\n";
+                            break;
+                        }
+
+                        // If no checked-out items, proceed to password verification
+                        std::cout << "\nEnter password to confirm deletion: ";
+                        std::cin >> enteredPassword;
+
+                        // If the password doesn't match the accounts fail verification
+                        if (storedPassword != enteredPassword) {
+                            std::cout << "\nPassword verification failed. Account not deleted...\n\n";
+                            ofs << line << "\n";
+                            break;
+                        }
+
+                        // Confirm deletion print statement, return to Guest
+                        std::cout << "\n------------------------------------";
+                        std::cout << "\nAccount '" << username << "' has been deleted.";
+                        std::cout << "\n------------------------------------\n";
+                        continue; 
+                    }
+                    // Write back all other accounts
+                    ofs << line << "\n";
+                }
+            }
+
+            // Error statement for when account isn't found in file
+            if (!userFound) {
+                std::cout << "\nError: No matching account found in the file.\n\n";
+            }
+
+            // Close the files
+            ifs.close();
+            ofs.close();
+
+            // Replace the original file with the temporary file
+            if (userFound && !hasCheckedOutItems && storedPassword == enteredPassword) {
+                if (std::remove(u_filename.c_str()) != 0 || std::rename(tempFilename.c_str(), u_filename.c_str()) != 0) {
+                    std::cout << "Error: Unable to update user file.\n";
+                } else {
+                    // Log out the user and switch to guest user mode
+                    delete m_user;
+                    m_user = nullptr;
+                    m_username = "Guest";
+                    m_password = "0";
+                    std::cout << "\nYou are now logged in as a guest user.\n\n";
+                }
+            } else {
+                // Clean up the temporary file if no user was deleted
+                std::remove(tempFilename.c_str());
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         /**
          * @author Andrew Martens & Rachel Roach
@@ -603,7 +738,9 @@ namespace LibSys {
 
             item->take_copy(); // decrement item's copy count
             m_user->m_items.push_back(item);
-            std::cout << "Item checked out successfully\n";
+            std::cout << "\n-----------------------------";
+            std::cout << "\nItem checked out successfully";
+            std::cout << "\n-----------------------------\n\n";
         }
 
 
