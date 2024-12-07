@@ -28,6 +28,4 @@ g++ -std=c++17 -o library_system main.cpp
 
 **RUNNING THE PROGRAM**
 
-Upon running the program, the user should enter a library name, and the program will construct a directory structure to store information. The user can also enter "help" to see a list of commands.
-
-NOTE: All commands and inputs are case-sensitive and searches for library items must match their corresponding title for that item to appear.
+Upon running the program, the user should enter a library name, and the program will construct a directory structure to store information and run in the terminal. A list of all comands can be seen by entering "help" in the console.
