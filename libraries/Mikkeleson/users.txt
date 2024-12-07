@@ -1,3 +1,1 @@
-Andrew;pass;200000;Bible
-librarian;password;200000
-Lily;password;100000;Toy Story
+Librarian;pass;200000

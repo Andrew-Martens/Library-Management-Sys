@@ -37,8 +37,8 @@ int main() {
             if(str != "y") {
                 continue;
             }
-            break;
         }
+        break;
     }
 
     //create object and run

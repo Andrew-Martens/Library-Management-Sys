@@ -18,6 +18,8 @@
 #include<vector>
 #include<filesystem>
 #include<fstream>
+#include<algorithm>
+#include<regex>
 #include<unordered_map>
 #include "Users.hh"
 #include "Items.hh"
@@ -113,7 +115,7 @@ namespace LibSys {
                     std::getline(std::cin, keyword);
                     keyword.erase(0,1); //removes the first char since it picks up a space
 
-                    if(!search(keyword)) {
+                    if(search(keyword) == 0) {
                         std::cout << "'" << keyword << "' not found\n";
                     }
                 } else if (command=="all-items") {
@@ -417,52 +419,51 @@ namespace LibSys {
             while(!ifs.eof()) {
                 //tokenize next line
                 tokenize_line(ifs, delimiter, tokens);
-                std::cout << tokens.size();
                 
                 //if the entered username matches the entry's username construct user
                 if (tokens.size() > 1 && tokens[0] == username) {
-            // Prompt for password
-            std::cout << "\nEnter password: ";
-            std::getline(std::cin, password);
+                    // Prompt for password
+                    std::cout << "\nEnter password: ";
+                    std::getline(std::cin, password);
 
-            // Verify password
-            if (tokens[1] == password) {
-                // Convert ID to integer
-                try {
-                    id = std::stoi(tokens[2]);
-                } catch (std::invalid_argument) {
-                    std::cout << "Error Logging in: File format error\n";
-                    return;
+                    // Verify password
+                    if (tokens[1] == password) {
+                        // Convert ID to integer
+                        try {
+                            id = std::stoi(tokens[2]);
+                        } catch (std::invalid_argument) {
+                            std::cout << "Error Logging in: File format error\n";
+                            return;
+                        }
+
+                        // Construct user object
+                        m_user = new User(username, password, id);
+                        m_username = username;
+
+                        // Populate user's items
+                        for (size_t i = 3; i < tokens.size(); i++) {
+                            std::string item = tokens[i];
+                            m_user->m_items.push_back(m_library[item]);
+                        }
+
+                        std::cout << "\nLog In Successful:\n";
+                        m_user->print(); // Print user info
+                        std::cout << "\n";
+                        ifs.close();
+                        return;
+                    } else {
+                        // Password mismatch
+                        std::cout << "\nIncorrect Password. Returning as Guest user...\n";
+                        ifs.close();
+                        return;
+                    }
                 }
-
-                // Construct user object
-                m_user = new User(username, password, id);
-                m_username = username;
-
-                // Populate user's items
-                for (size_t i = 3; i < tokens.size(); i++) {
-                    std::string item = tokens[i];
-                    m_user->m_items.push_back(m_library[item]);
+                    }
+                    //if no account was found close input file and ask user if they would like to make an account
+                    ifs.close();
+                    std::cout << "\nAccount not found\n";
+                    createAccount();
                 }
-
-                std::cout << "\nLog In Successful:\n";
-                m_user->print(); // Print user info
-                std::cout << "\n";
-                ifs.close();
-                return;
-            } else {
-                // Password mismatch
-                std::cout << "\nIncorrect Password. Returning as Guest user...\n";
-                ifs.close();
-                return;
-            }
-        }
-            }
-            //if no account was found close input file and ask user if they would like to make an account
-            ifs.close();
-            std::cout << "\nAccount not found\n";
-            createAccount();
-        }
 
         /**
          * @author Andrew Martens
@@ -497,37 +498,66 @@ namespace LibSys {
 
 
 
+
+
         /**
          * @author Andrew Martens
          * 
          * @brief searches through library's inventory to see if an item with inputed keyword exists
          * @param keyword the title to search for
-         * @returns false if item isn't found
+         * @returns number of items printed
          */
-        bool search(std::string keyword) {
-            //check if item exists in the library
-            if(m_library.count(keyword) == 0) {
-                return false;
-            } else {
-                std::cout << "\n"; //formating
+        int search(std::string keyword) {
+            std::regex pattern(tolower(keyword) + ".*");
+            int count;
 
-                // gets item and id from the map then casts it based on its id
-                Item* item = m_library[keyword];
+            for(const auto& entry : m_library) {
+                std::string title = entry.first;
+                title = tolower(title);
+                std::string contributer;
+
+                Item* item = entry.second;
                 int id = item->get_id();
                 switch(id) {
                     case 1:
-                        dynamic_cast<Book*>(item)->print();
+                        contributer = tolower(dynamic_cast<Book*>(item)->get_author());
+                        if(std::regex_match(contributer, pattern) || std::regex_match(title, pattern)) {
+                            dynamic_cast<Book*>(item)->print();
+                            count++;
+                        }
                         break;
                     case 2: 
-                        dynamic_cast<Film*>(item)->print();
+                        contributer = tolower(dynamic_cast<Film*>(item)->get_director());
+                        if(std::regex_match(contributer, pattern) || std::regex_match(title, pattern)) {
+                            dynamic_cast<Film*>(item)->print();
+                            count++;
+                        }
                         break;
                     case 3: 
-                        dynamic_cast<Magazine*>(item)->print();
+                        contributer = tolower(dynamic_cast<Magazine*>(item)->get_publisher());
+                        if(std::regex_match(contributer, pattern) || std::regex_match(title, pattern)) {
+                            dynamic_cast<Magazine*>(item)->print();
+                            count++;
+                        }
                         break;
                 }
                 std::cout << "\n"; //formating
-                return true;
+
             }
+            return count;
+        }
+
+        /**
+         * @author Andrew Martens
+         * @brief converts a string to lowercase
+         * @note helper function for @see search(std::string)
+         */
+        std::string tolower(std::string s) {
+            //transforms each char to lowercase
+            std::transform(s.begin(), s.end(), s.begin(),
+                        [](unsigned char c){ return std::tolower(c); }
+                        );
+            return s;
         }
 
         /**
