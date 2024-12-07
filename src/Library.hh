@@ -63,8 +63,8 @@ namespace LibSys {
                                     u_filename("libraries/"+name+"/users.txt"), i_filename("libraries/"+name+"/inventory.txt") {
 
             // Create directory structure to store library information
-            std::filesystem::create_directory("libraries");
-            std::filesystem::path lib_path("libraries/" + name);
+            std::filesystem::create_directory(".libraries");
+            std::filesystem::path lib_path(".libraries/" + name);
             if(std::filesystem::create_directory(lib_path)) {
                 // Create the files that store user, and inventory information
                 std::ofstream user_file(u_filename);

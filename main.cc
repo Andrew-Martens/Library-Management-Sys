@@ -30,7 +30,7 @@ int main() {
         if(lib_name.find(' ') != std::string::npos) {
             throw std::invalid_argument("Error: Library name can't contain a space");
         }
-        if(!std::filesystem::exists("libraries/"+lib_name)) {
+        if(!std::filesystem::exists(".libraries/"+lib_name)) {
             std::string str;
             std::cout << "No existing library named " << lib_name << " found. Would you like to create a new library [y/n]: ";
             std::cin >> str;
