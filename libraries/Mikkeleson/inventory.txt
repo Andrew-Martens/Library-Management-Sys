@@ -1,4 +1,5 @@
 3;Animals;National Geographic;1
 1;Dune;Frank Herbert;1
+1;Book;Author;1
 2;Toy Story;John Lasseter;0
 1;Bible;Jesus;1

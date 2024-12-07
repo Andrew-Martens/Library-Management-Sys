@@ -417,7 +417,7 @@ namespace LibSys {
             while(!ifs.eof()) {
                 //tokenize next line
                 tokenize_line(ifs, delimiter, tokens);
-                
+                std::cout << tokens.size();
                 
                 //if the entered username matches the entry's username construct user
                 if (tokens.size() > 1 && tokens[0] == username) {
