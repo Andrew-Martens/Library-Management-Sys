@@ -54,7 +54,7 @@ namespace LibSys {
          *                  inventory.txt
          */
         Library(std::string name) : m_library_name(name), m_user(nullptr), m_username("Guest"), m_password("0"),
-                                    u_filename("libraries/"+name+"/users.txt"), i_filename("libraries/"+name+"/inventory.txt") {
+                                    u_filename(".libraries/"+name+"/users.txt"), i_filename(".libraries/"+name+"/inventory.txt") {
 
             // Create directory structure to store library information
             std::filesystem::create_directory(".libraries");
@@ -245,7 +245,7 @@ namespace LibSys {
          */
         void write_users() {
             //input file from users.txt and create a temp file to write to
-            std::string t_filename = "Libraries/"+ m_library_name +"/temp.txt";
+            std::string t_filename = ".libraries/"+ m_library_name +"/temp.txt";
             std::ifstream ifs(u_filename);
             std::ofstream temp(t_filename);
 
