@@ -3,11 +3,6 @@
 *
 * This file contains the high level functionallity for the library system
 * to use create Library object and call run()
-*
-* TODO: ptentially add a remove-user function
-* CURRENT: DOCUMENT AND TEST!!!
-*  
-* 
 */
 
 #ifndef LIBRARY_HH__
@@ -28,7 +23,7 @@
 namespace LibSys {
 
     /**
-     * @author Andrew Martens
+     * @author Andrew Martens & Rachel Roach
      * @class Library
      *
      * @brief higher level class that manages interactions between users and library inventory
@@ -112,12 +107,13 @@ namespace LibSys {
                     deleteAccount();
                 } else if (command=="search") {
                     //get keyword from user
+                    std::cout << "\n";
                     std::string keyword;
                     std::getline(std::cin, keyword);
                     keyword.erase(0,1); //removes the first char since it picks up a space
 
                     if(search(keyword) == 0) {
-                        std::cout << "'" << keyword << "' not found\n";
+                        std::cout << "\n'" << keyword << "' not found\n";
                     }
                 } else if (command=="all-items") {
                     print_items();
@@ -140,14 +136,14 @@ namespace LibSys {
                 } else if (command=="checkout") {
                     //ensure user is logged in
                     if(!m_user){
-                        std::cout << "Must login to checkout items\n";
+                        std::cout << "\nMust login to checkout item\n\n";
                         continue;
                     }
                     checkout();
                 } else if (command=="return-item"){
                     //ensure user is logged in
                     if(!m_user){
-                        std::cout << "Must login to checkout items\n";
+                        std::cout << "\nMust login to return item\n\n";
                         continue;
                     }
                     return_item();
@@ -156,12 +152,11 @@ namespace LibSys {
                     if(!m_user || m_user->m_id < 200000){
                         std::cout << "\nOnly librarians can access this command\n\n";
                         continue;
-                    }
-                    add_item();
+                    } else {add_item();}
                 } else if(command=="remove-item") {
                     //ensure user is logged in to an admin account
                     if(!m_user || m_user->m_id < 200000){
-                        std::cout << "Only librarians can access this command\n";
+                        std::cout << "\nOnly librarians can access this command\n\n";
                         continue;
                     }
                     remove_item();
@@ -169,7 +164,7 @@ namespace LibSys {
                     if(!m_user) {
                         std::cout << "\nUnknown Command\n\n";
                     } else {
-                        std::cout << "\n\nCommand not available for logged in users\n\n";
+                        std::cout << "\nCommand not available for logged in users\n\n";
                     }
                 }
             }
@@ -325,7 +320,8 @@ namespace LibSys {
         /**
         * @author Rachel Roach
         *
-        * @brief creates a user account and stores it in a file
+        * @brief creates a user account and stores it in a file, provides the 
+        * user with different account options available to them
         */
         void createAccount() {
             
@@ -349,9 +345,9 @@ namespace LibSys {
                     std::cout << "\nTo create librarian account enter 'l', else enter 'm' > ";
                     std::cin >> ch;
 
-                    if(ch == 'l') { //code to create librarian/admin account
+                    if(ch == 'l') {
                         //construct user with admin permissions and print
-                        std::cout << "Enter a username: ";
+                        std::cout << "\nEnter a username: ";
                         std::cin >> username;
                         std::cout << "Enter a password: ";
                         std::cin >> password;
@@ -367,7 +363,7 @@ namespace LibSys {
                         id = create_id(false);
                         m_user = new User(username, password, id);
                         m_username = m_user->m_name;
-                    } else { //code to create library member account
+                    } else { 
                         std::cout << "\nCreating empty account w/ no permissions...\n";
                         //construct user without admin permissions and print
                         id = create_id(false);
@@ -385,14 +381,6 @@ namespace LibSys {
                     std::cout << "\nReturning to Guest user...\n";
                 }
         }
-
-
-
-
-
-
-
-
 
         /**
         * @author Rachel Roach
@@ -505,21 +493,6 @@ namespace LibSys {
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         /**
          * @author Andrew Martens & Rachel Roach
          *
@@ -631,10 +604,6 @@ namespace LibSys {
             tokens.push_back(s);
         }
 
-
-
-
-
         /**
          * @author Andrew Martens
          * 
@@ -696,12 +665,13 @@ namespace LibSys {
         }
 
         /**
-         * @author Andrew Martens
+         * @author Andrew Martens & Rachel Roach
          * 
          * @brief prints all library items
          */
         void print_items() {
-            std::cout << "\nListing all items:\n\n";
+            std::cout << "\nListing all items:\n";
+            std::cout << "-------------------\n\n";
             // iterates through each key-value pair in the unordered map
             for(const auto& pair : m_library) {
                 Item* item = pair.second;
@@ -773,7 +743,6 @@ namespace LibSys {
             std::cout << "\n-----------------------------\n\n";
         }
 
-
         /**
          * @author Andrew Martens
          *
@@ -792,7 +761,9 @@ namespace LibSys {
                 if(item->get_name() == keyword) {  // if they match add the copy back erase it
                     item->add_copy();
                     m_user->m_items.erase(m_user->m_items.begin()+i); // erase it from checked out
-                    std::cout << "Returned '" << keyword << "'\n";
+                    std::cout << "\n------------------------\n";
+                    std::cout << "Returned '" << keyword << "'";
+                    std::cout << "\n------------------------\n\n";
                     return;
                 }
             }
@@ -908,7 +879,7 @@ namespace LibSys {
         }
 
         /**
-         * @author Andrew Martens
+         * @author Andrew Martens & Rachel Roach
          *
          * @brief prompts for keyword then removes item from library if found
          * 
@@ -920,13 +891,13 @@ namespace LibSys {
             keyword.erase(0,1); //removes leading space
 
             if(m_library.erase(keyword) == 1) { //erase from unordered map
+                std::cout << "\n----------------------------\n";
                 std::cout << "Removed '" << keyword << "'\n";
+                std::cout << "----------------------------\n\n";
             } else{
-                std::cout << "Item not found\n";
+                std::cout << "\nItem not found\n\n";
             }
         }
-
-
 
         /**
          * @author Andrew Martens
